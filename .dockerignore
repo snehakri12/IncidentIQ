@@ -1,0 +1,19 @@
+# Keep credentials, local tooling, and development-only files out of images.
+.env
+.env.*
+!.env.example
+.git
+.github
+.agents
+.venv
+__pycache__
+*.py[cod]
+.pytest_cache
+.coverage
+chroma_data
+tests
+edge_node_service
+scripts
+README.md
+LICENSE
+docker-compose.yml

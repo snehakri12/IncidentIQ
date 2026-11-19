@@ -1,0 +1,4 @@
+2026-11-18T02:14:03Z INFO  reconciliation-worker starting batch run id=7421
+2026-11-18T02:14:05Z INFO  loaded 1,284,330 input records from s3://demo-bucket/exports/full.csv
+2026-11-18T02:19:41Z WARN  heap usage at 92% of configured limit (3.7GiB / 4.0GiB)
+2026-11-18T02:20:12Z ERROR out of memory while processing records; container killed (OOMKilled)

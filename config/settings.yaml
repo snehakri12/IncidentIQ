@@ -1,0 +1,56 @@
+# IncidentIQ runtime settings. Secrets and endpoints come from the environment
+# (see .env.example); this file holds defaults and prompt/tool configuration.
+
+llm:
+  # Flip on with LLM_ENABLED=true (requires OPENAI_API_KEY).
+  enabled: false
+  model: gpt-4o-mini
+  temperature: 0
+  timeout_seconds: 30
+  system_prompt: >
+    You are IncidentIQ, a senior site-reliability engineer. Diagnose software
+    and batch-job failures. Ground every claim in the evidence provided; if the
+    evidence does not support a conclusion, say so explicitly. Be concise and
+    actionable.
+  user_prompt: |
+    Ticket: {ticket_id}
+    Job: {job_name}
+    Rule-based classification: {failure_type}
+
+    Incident description:
+    {description}
+
+    Log excerpt:
+    {log_excerpt}
+
+    Evidence gathered:
+    {evidence}
+
+    Provide: (1) the most likely root cause, (2) how the evidence supports it,
+    (3) concrete remediation steps.
+
+retrieval:
+  # Flip on with RAG_USE_CHROMADB=true (requires OPENAI_API_KEY); otherwise a
+  # keyword fallback searches the same local synthetic corpus.
+  use_chromadb: false
+  embedding_model: text-embedding-3-small
+  collection: incidents
+  persist_directory: chroma_data
+  top_k: 3
+  chunk_size: 80
+  chunk_overlap: 20
+
+github:
+  # owner/repo/ref may also come from GITHUB_OWNER / GITHUB_REPO env vars.
+  owner: ""
+  repo: ""
+  ref: main
+  default_path: app/main.py
+  mcp:
+    tool: get_file_contents
+
+jira:
+  project: OPS
+  max_results: 5
+  mcp:
+    tool: search_issues

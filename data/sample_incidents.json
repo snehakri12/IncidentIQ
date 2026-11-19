@@ -1,0 +1,66 @@
+[
+  {
+    "id": "INC-1001",
+    "summary": "Reconciliation worker killed after exceeding its memory limit during a large import",
+    "details": "A full-ledger export of 1.2M records was processed in a single in-memory batch. Heap grew past the 4GiB container limit and the worker was OOMKilled. Logs showed 'out of memory while processing records'.",
+    "resolution": "Switched the import to streaming batches of 10k records and raised the container memory limit to 6GiB.",
+    "tags": ["memory", "oom", "batch", "import", "resource"],
+    "occurred_at": "2026-03-14"
+  },
+  {
+    "id": "INC-1002",
+    "summary": "Nightly export job failed with permission denied writing to the reports bucket",
+    "details": "A credential rotation removed the service account's storage.objectCreate role. Every write returned 403 permission denied.",
+    "resolution": "Re-granted the writer role to the job's service account and added an IAM policy check to the deploy pipeline.",
+    "tags": ["permission", "iam", "credentials", "403"],
+    "occurred_at": "2026-04-02"
+  },
+  {
+    "id": "INC-1003",
+    "summary": "Payment webhook processor timed out calling the ledger service",
+    "details": "p99 latency on the ledger service spiked during a deploy; webhook calls exceeded the 5s client timeout and the queue backed up.",
+    "resolution": "Raised the client timeout to 15s, added retry with exponential backoff, and gated ledger deploys on latency SLOs.",
+    "tags": ["timeout", "latency", "dependency", "queue"],
+    "occurred_at": "2026-05-21"
+  },
+  {
+    "id": "INC-1004",
+    "summary": "ETL pipeline crashed on schema mismatch after an upstream column rename",
+    "details": "The vendor feed renamed 'customer_id' to 'customerId'. The parser raised a parse error and the whole batch failed instead of quarantining bad records.",
+    "resolution": "Added schema validation with a quarantine path for malformed records and a contract test against the vendor feed.",
+    "tags": ["data", "schema", "etl", "parse"],
+    "occurred_at": "2026-06-09"
+  },
+  {
+    "id": "INC-1005",
+    "summary": "Search indexer failed with no space left on device",
+    "details": "Index snapshots were never pruned; the data volume filled up and writes failed with ENOSPC.",
+    "resolution": "Added snapshot retention of 7 days, disk-usage alerts at 80%, and expanded the volume.",
+    "tags": ["disk", "storage", "resource", "enospc"],
+    "occurred_at": "2026-07-17"
+  },
+  {
+    "id": "INC-1006",
+    "summary": "Report generator failed with connection refused to the metadata database",
+    "details": "A network policy change blocked the job's namespace from reaching the database. All connections were refused at startup.",
+    "resolution": "Fixed the network policy selector and added a connectivity preflight check to the job.",
+    "tags": ["dependency", "network", "database", "connection"],
+    "occurred_at": "2026-08-05"
+  },
+  {
+    "id": "INC-1007",
+    "summary": "Billing sync aborted: missing environment variable STRIPE_WEBHOOK_SECRET",
+    "details": "A refactor renamed the variable in the deployment manifest but not in the application config. The job failed at startup with a configuration error.",
+    "resolution": "Restored the variable name and added startup validation that fails fast with a clear message listing missing configuration.",
+    "tags": ["configuration", "environment", "startup"],
+    "occurred_at": "2026-09-12"
+  },
+  {
+    "id": "INC-1008",
+    "summary": "Large CSV import worker ran out of memory building an in-memory join",
+    "details": "Joining two large datasets in pandas doubled peak memory; the worker exceeded its limit on month-end volumes with 'MemoryError'.",
+    "resolution": "Moved the join into the warehouse (SQL) and streamed only the joined result, cutting peak memory by 85%.",
+    "tags": ["memory", "import", "pandas", "batch", "oom"],
+    "occurred_at": "2026-10-28"
+  }
+]
